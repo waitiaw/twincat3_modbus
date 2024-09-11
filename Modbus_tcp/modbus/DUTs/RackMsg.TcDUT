@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <DUT Name="RackMsg" Id="{af2f8b95-045e-4ec2-8262-25be3cd7030a}">
+    <Declaration><![CDATA[TYPE RackMsg :
+STRUCT
+	Heartbeat                       : UINT;
+	Bank_SOC                        : UINT;
+	Bank_SOH                        : UINT;
+	Bank_Voltage                    : UINT;
+	Bank_Current                    : INT;
+	Max_Cell_Voltage                : UINT;
+	Max_Cell_Voltage_Position       : UINT;
+	Min_Cell_Voltage                : UINT;
+	Min_Cell_Voltage_Position       : UINT;
+	Cell_Voltage_Gap                : UINT;
+	Rack_Average_Cell_Voltage       : UINT;
+	Max_Cell_temperature            : INT;
+	Max_Cell_temperature_Position   : UINT;
+	Min_Cell_temperature            : INT;
+	Min_Cell_temperature_Position   : UINT;
+	Cell_Temperature_Gap            : UINT;
+	Max_Module_temperature          : INT;
+	Max_Module_temperature_Position : UINT;
+	Min_Module_temperature          : INT;
+	Min_Module_temperature_Position : UINT;
+    Max_Module_Humidity             : INT;
+	Max_Module_Humidity_Position    : UINT;
+	Min_Module_Humidity             : INT;
+	Min_Module_Humidity_Position    : UINT;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

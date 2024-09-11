@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <POU Name="MAIN" Id="{6cb380e2-d974-46a3-b4f6-7c094ba3c582}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+
+VAR
+	fbReadRegs1: FB_MBReadRegs;
+	fbReadRegs2: FB_MBReadRegs;
+
+	bmsmsg : BMSMsg;
+	rackmsg : ARRAY [0..39] OF RackMsg;
+	bms_value         : ARRAY [0..39] OF WORD;
+	rack_value        : ARRAY [0..39] OF WORD;
+	arrValue: INT;
+	bReadeRegs: BOOL;
+	pSrcAddr: INT;
+	i : INT ;
+	j : UINT := 0;
+	result: STRING;
+	timer: TON; // 타이머 선언
+	bReadError: BOOL;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[timer(IN:= TRUE, PT:= T#1S); 
+
+IF timer.Q THEN 
+		
+		timer(IN := FALSE); 
+		IF NOT bReadError THEN
+			fbReadRegs1.sIPAddr := '192.168.0.144';
+			fbReadRegs1.nTCPPort := 505;
+			fbReadRegs1.nUnitID := 1;
+			fbReadRegs1.tTimeout := T#1S;
+			fbReadRegs1.nQuantity := 40;
+			fbReadRegs1.nMBAddr := 57;
+			fbReadRegs1.cbLength := SIZEOF(bms_value);
+			fbReadRegs1.pDestAddr := ADR(bms_value);
+			fbReadRegs1(bExecute:=TRUE); //작업 시작을 알림
+			
+			IF NOT fbReadRegs1.bBUSY THEN
+			bms();
+			breadError := TRUE;
+			fbReadRegs1(bExecute := FALSE); 
+			END_IF
+		END_IF
+		
+		IF bReadError THEN
+			fbReadRegs2.sIPAddr := '192.168.0.144';
+			fbReadRegs2.nTCPPort := 505;
+			fbReadRegs2.nUnitID := 2;
+			fbReadRegs2.tTimeout := T#1S;
+			fbReadRegs2.nQuantity := 40;
+			fbReadRegs2.nMBAddr := 150 + 40 * j;
+			fbReadRegs2.cbLength := SIZEOF(rack_value);
+			fbReadRegs2.pDestAddr := ADR(rack_value);
+			fbReadRegs2(bExecute:=TRUE); 
+			IF NOT fbReadRegs2.bBUSY THEN  // 작업 준비 완료가 확인 될때까지 설정 상태 유지 
+				rack();
+				breadError := FALSE;
+				fbReadRegs2(bExecute := FALSE); 
+			END_IF
+				j := j +1;
+			IF j>= 40 THEN
+				j := 0;
+			END_IF
+		END_IF
+		
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="bms" Id="{942ae53e-2358-4a8a-b387-26aaf55d7101}">
+      <Implementation>
+        <ST><![CDATA[bmsmsg.Bank_RUN 						:= bms_value[0] * 1000;
+bmsmsg.Order_Source 					:= bms_value[1]* 1000;
+bmsmsg.Mode_Source 						:= bms_value[2]* 10;
+bmsmsg.Emergency_Source 				:= bms_value[3]* 10;
+bmsmsg.Heartbeat						:= bms_value[4]* 10;
+bmsmsg.Bank_SOC							:= bms_value[5]* 10;
+bmsmsg.Bank_SOH							:= bms_value[6]* 10;
+bmsmsg.Bank_Voltage 					:= bms_value[7]* 10;
+bmsmsg.Bank_Current 					:= bms_value[8]* 10;
+bmsmsg.Bank_Power 						:= bms_value[9]* 10;
+bmsmsg.System_Level_Charge_Current 		:= bms_value[10]* 10;
+bmsmsg.System_Level_Discharge_Current 	:= bms_value[11]* 10;
+bmsmsg.System_Level_DC_Charge_Power 	:= bms_value[12]* 10;
+bmsmsg.System_Level_DC_Discharge_Power 	:= bms_value[13]* 10;
+bmsmsg.Max_Cell_Voltage 				:= bms_value[14]* 1000;
+bmsmsg.Min_Cell_Voltage 				:= bms_value[15]* 1000;
+bmsmsg.Max_Cell_temperature 			:= bms_value[16]* 10;
+bmsmsg.Min_Cell_temperature 			:= bms_value[17]* 10;
+bmsmsg.Max_moduel_Temperature 			:= bms_value[18]* 10;
+bmsmsg.Min_moduel_Temperature 			:= bms_value[19]* 10;
+bmsmsg.Max_moduel_Humidity 				:= bms_value[20]* 1000;
+bmsmsg.Min_moduel_Humidity 				:= bms_value[21]* 1000;
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="rack" Id="{acd058dd-f127-42d2-bade-c369b8cb8333}">
+      <Implementation>
+        <ST><![CDATA[rackmsg[j].Heartbeat                               := rack_value[1] * 1;
+rackmsg[j].Bank_SOC                                := rack_value[2] * 1000;
+rackmsg[j].Bank_SOH                                := rack_value[3] * 10;
+rackmsg[j].Bank_Voltage                            := rack_value[4] * 10;
+rackmsg[j].Bank_Current                            := rack_value[5] * 1000;
+rackmsg[j].Max_Cell_Voltage                        := rack_value[6] * 1000;
+rackmsg[j].Max_Cell_Voltage_Position               := rack_value[7] * 1000;
+rackmsg[j].Min_Cell_Voltage                        := rack_value[8] * 1000;
+rackmsg[j].Min_Cell_Voltage_Position               := rack_value[9] * 1000;
+rackmsg[j].Cell_Voltage_Gap                        := rack_value[10] * 1000;
+rackmsg[j].Rack_Average_Cell_Voltage               := rack_value[11] * 1000;
+rackmsg[j].Max_Cell_temperature                    := rack_value[12] * 10;
+rackmsg[j].Max_Cell_temperature_Position           := rack_value[13] * 10;
+rackmsg[j].Min_Cell_temperature                    := rack_value[14] * 10;
+rackmsg[j].Min_Cell_temperature_Position           := rack_value[15] * 10;
+rackmsg[j].Cell_Temperature_Gap                    := rack_value[16] * 10;
+rackmsg[j].Max_Module_temperature                  := rack_value[17] * 10;
+rackmsg[j].Max_Module_temperature_Position         := rack_value[18] * 10;
+rackmsg[j].Min_Module_temperature                  := rack_value[19] * 10;
+rackmsg[j].Min_Module_temperature_Position         := rack_value[20] * 10;
+rackmsg[j].Max_Module_Humidity                     := rack_value[21] * 10;
+rackmsg[j].Max_Module_Humidity_Position            := rack_value[22] * 10;
+rackmsg[j].Min_Module_Humidity                     := rack_value[23] * 10;
+rackmsg[j].Min_Module_Humidity_Position            := rack_value[24] * 10;
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="MAIN">
+      <LineId Id="363" Count="43" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.bms">
+      <LineId Id="38" Count="21" />
+      <LineId Id="27" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.rack">
+      <LineId Id="2" Count="2" />
+      <LineId Id="6" Count="20" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

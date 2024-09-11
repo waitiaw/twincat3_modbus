@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.9">
+  <DUT Name="BMSMsg" Id="{e027263c-99a0-4795-8c70-ce1cdc740086}">
+    <Declaration><![CDATA[TYPE BMSMsg :
+STRUCT
+	Bank_RUN                        : UINT;
+	Order_Source                    : UINT;
+	Mode_Source                     : UINT;
+	Emergency_Source                : UINT;
+	Heartbeat                       : UINT;
+	Bank_SOC                        : UINT;
+	Bank_SOH                        : UINT;
+	Bank_Voltage                    : UINT;
+	Bank_Current                    : INT;
+	Bank_Power                      : INT;
+	System_Level_Charge_Current     : UINT;
+	System_Level_Discharge_Current  : UINT;
+	System_Level_DC_Charge_Power    : UINT;
+	System_Level_DC_Discharge_Power : UINT;
+	Max_Cell_Voltage                : UINT;
+	Min_Cell_Voltage                : UINT;
+	Max_Cell_temperature            : INT;
+	Min_Cell_temperature            : INT;
+	Max_moduel_Temperature          : INT;
+	Min_moduel_Temperature          : INT;
+	Max_moduel_Humidity             : UINT;
+	Min_moduel_Humidity             : UINT;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
